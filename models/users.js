@@ -1,3 +1,6 @@
+/// Defining Models ///
+
+
 var mongoose = require('mongoose')
 var crypto = require('crypto-js')
 
@@ -16,5 +19,8 @@ var userSchema = new mongoose.Schema({
         required:true
     }
 });
+/// Defining Models ///
 
+/// Naming Model ///
 const UserModel = mongoose.model('UserModel', userSchema);
+/// Naming Model ///
