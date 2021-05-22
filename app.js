@@ -1,6 +1,9 @@
 ///Importing modules/ packages ///
 var express = require('express');
-var mongoose = require('mongoose')
+var mongoose = require('mongoose');
+/// Added Body Parser ///
+var bodyparser = require('body-parser');
+/// Added Body Parser ///
 var cors = require('cors')
 var cool = require('cool-ascii-faces');
 ///Importing modules/ packages ///
@@ -32,8 +35,11 @@ require('./models/users.js')
 /// Importing routes ///
 
 var app = express();
-
-
+/// Defining Body Parsers ///
+app.use(bodyparser.urlencoded({ extended: true }));
+app.use(bodyparser.json());
+app.use(bodyparser.raw());
+/// Defining Body Parsers ///
 app.use(cors());
 app.use('/api',route)
 
