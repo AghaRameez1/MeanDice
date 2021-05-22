@@ -21,6 +21,24 @@ router.get('/userfind',function(req,res){
     res.send(cool());
 })
 
+router.post('/login', function(request,response){
+    var {email, password} = request.body
+    user.findOne({ "email": email }, function (err, userDocument) {
+        if (err) throw err;
+        userDocument.comparePassword(password, function (err, isMatch) {
+            if (err) throw err;
+            if (isMatch) {
+                // res.sendStatus(200)
+                response.json(success("Ok", { data: "User Authenticated" }, response.statusCode))
+            } else {
+                // res.json({"user":"Password Invalid"});
+                response.json(error("Password Invalid", response.statusCode))
+                // res.json('user not found').sendStatus(200)
+            }
+        })
+    })
+})
+
 
 router.post('/register', function(request, response){
    var {firstName,lastName, email, password} = request.body
