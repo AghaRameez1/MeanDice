@@ -1,4 +1,6 @@
 ///Importing modules/ packages ///
+const path = require("path");
+const fs = require("fs");
 var express = require('express');
 var mongoose = require('mongoose');
 /// Added Body Parser ///
@@ -41,6 +43,7 @@ app.use(bodyparser.json());
 app.use(bodyparser.raw());
 /// Defining Body Parsers ///
 app.use(cors());
+app.get("/", express.static(path.join(__dirname, "./public")));
 app.use('/api',route)
 
 
