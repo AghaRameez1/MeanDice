@@ -39,21 +39,46 @@ const handleError = (err, res) => {
 };
 
 router.get('/userfind',function(req,res){
-    res.send(cool());
+    console.log(req.query.id)
+    user.findOne({ "_id": req.query.id }, function (err, userDocument) {
+        if(userDocument){
+            res.json({
+                'code': 200,
+                'data':'Ok',
+                'message':'User Avaiable'
+            });
+        }else{
+            res.json({
+                'code': 400,
+                'data':'error',
+                'message':'User not avaiable'
+            });
+        }
+    });
+    // res.send(cool());
 })
 
 router.post('/login', function(request,response){
     var {email, password} = request.body
     user.findOne({ "email": email }, function (err, userDocument) {
         if (err) throw err;
-        userDocument.comparePassword(password, function (err, isMatch) {
+            if(userDocument == null){
+                response.json({
+                    'code': 404,
+                    'data':'Error',
+                    'message':'Invalid email'
+                })
+            }
+            else{
+                userDocument.comparePassword(password, function (err, isMatch) {
             if (err) throw err;
             if (isMatch) {
                 // res.sendStatus(200)
                 response.json({
                     'code': 200,
                     'data':'Ok',
-                    'message':'User Authenticated'
+                    'message':'User Authenticated',
+                    'id':userDocument.id
                 })
             } else {
                 // res.json({"user":"Password Invalid"});
@@ -65,17 +90,19 @@ router.post('/login', function(request,response){
                 // res.json('user not found').sendStatus(200)
             }
         })
+    }
     })
 })
 
 
 router.post('/register', function(request, response){
-   var {firstName1,lastName1, email1, password1} = request.body
-   user.findOne({ "email": email1 }, function (err, alreadyUser) {
+   var {firstName,lastName, email, password} = request.body
+   user.findOne({ "email": email }, function (err, alreadyUser) {
     if (err) throw err;
         if (alreadyUser) {
         console.log(alreadyUser);
          response.json({
+             'code':404,
              'data':'error',
              'message':'Email Already Registered'
          });
@@ -83,10 +110,10 @@ router.post('/register', function(request, response){
     } else {
         // var userObject = new user({firstName: firstName, lastName:lastName, email:email, password:password})
         var userObject = new user();
-        userObject.firstName = firstName1;
-        userObject.lastName = lastName1;
-        userObject.email = email1;
-        userObject.password = password1;
+        userObject.firstName = firstName;
+        userObject.lastName = lastName;
+        userObject.email = email;
+        userObject.password = password;
         var img = fs.readFileSync('./uploads/profileImage.png');
         var finalImage = {
             contentType:'image/png',
@@ -101,6 +128,7 @@ router.post('/register', function(request, response){
         }
         console.log(document)
         response.json({
+            'code':200,
             'data': document.id,
             'message':'success'
         });
