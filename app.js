@@ -17,7 +17,7 @@ var settings = require('./config/config')
 console.log(settings)
 
 /// DATABASE CONNECTION ///
-mongoose.connect('mongodb+srv://agharameez:Thek1ller@meanstackclustier.kaztg.mongodb.net/firstNode?retryWrites=true&w=majority',{useNewUrlParser: true,
+mongoose.connect(settings.mogoosevariable,{useNewUrlParser: true,
 useUnifiedTopology: true,
 useFindAndModify: false,
 useCreateIndex: true })
