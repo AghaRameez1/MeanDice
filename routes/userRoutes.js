@@ -9,6 +9,8 @@ var bcrypt = require('bcrypt')
 const router = express();
 
 
+const port = process.env.PORT || 3000
+
 ///Importing modules/ packages ///
 
 
@@ -45,7 +47,7 @@ router.get('/userfind',function(req,res){
                     'firstName': userDocument.firstName,
                     'lastName': userDocument.lastName,
                     'email': userDocument.email,
-                    'img': 'http://localhost:3000/public'+userDocument.img
+                    'img': 'https://meandicemeanstack.herokuapp.com/public'+userDocument.img
                 },
                 'message':'User Avaiable'
             });
@@ -161,7 +163,7 @@ router.put('/updateUser',upload.single('image'),function(req,res){
                 'firstName': userDocument.firstName,
                 'lastName': userDocument.lastName,
                 'email': userDocument.email,
-                'img': 'http://localhost:3000/public'+userDocument.img
+                'img': 'https://meandicemeanstack.herokuapp.com/public'+userDocument.img
             },
             'message':'User Avaiable'
         });
