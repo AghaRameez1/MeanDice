@@ -11,7 +11,7 @@ var cool = require('cool-ascii-faces');
 ///Importing modules/ packages ///
 
 ///defining port ///
-const port = 3000
+const port = process.env.PORT || 3000
 ///defining port ///
 var settings = require('./config/config')
 console.log(settings)
