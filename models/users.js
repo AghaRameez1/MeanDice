@@ -23,8 +23,7 @@ var userSchema = new mongoose.Schema({
         required:true
     },
     img: { 
-        data: Buffer, 
-        contentType: String 
+        type:String, 
      }
 });
 /// Defining Models ///
@@ -54,7 +53,20 @@ userSchema.methods.comparePassword = function(candidatePassword, cb) {
     });
 };
 /// Compare Passowrd ///
-
+userSchema.pre("update", function(next) {
+    const password = this.getUpdate().$set.password;
+    if (!password) {
+        return next();
+    }
+    try {
+        const salt = Bcrypt.genSaltSync();
+        const hash = Bcrypt.hashSync(password, salt);
+        this.getUpdate().$set.password = hash;
+        next();
+    } catch (error) {
+        return next(error);
+    }
+});
 /// Naming Model ///
 const UserModel = mongoose.model('UserModel', userSchema);
 /// Naming Model ///

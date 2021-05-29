@@ -4,7 +4,8 @@ var mongoose = require('mongoose');
 var cool = require('cool-ascii-faces');
 var fs = require('fs');
 const { success, error, validation } = require('../responses/responsesApi')
-const multer = require("multer");
+var multer = require("multer");
+var bcrypt = require('bcrypt')
 const router = express();
 
 
@@ -20,31 +21,32 @@ var user = mongoose.model('UserModel');
 
 
 
-var storage = multer.diskStorage(
-    {
-        destination: './uploads/',
-        filename: function (req, file, cb) {
-            cb(null, file.originalname);
-        }
+var storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, './public/'); // folder path
+      },
+      filename: (req, file, cb) => {
+        var imageUrl = '/'+file.originalname.replace(/\\/g, "/");
+        cb(null, imageUrl);
+        // cb(null, `${uuid()}.${mime.extension(file.mimetype)}`); // file name here
+      }
     }
 );
 
-var upload = multer({ storage: storage });
-
-const handleError = (err, res) => {
-  res
-    .status(500)
-    .contentType("text/plain")
-    .end("Oops! Something went wrong!");
-};
+const upload = multer( {storage:storage} );
 
 router.get('/userfind',function(req,res){
-    console.log(req.query.id)
     user.findOne({ "_id": req.query.id }, function (err, userDocument) {
         if(userDocument){
             res.json({
                 'code': 200,
-                'data':'Ok',
+                'data':{
+                    'id':userDocument._id,
+                    'firstName': userDocument.firstName,
+                    'lastName': userDocument.lastName,
+                    'email': userDocument.email,
+                    'img': 'http://localhost:3000/public'+userDocument.img
+                },
                 'message':'User Avaiable'
             });
         }else{
@@ -100,7 +102,6 @@ router.post('/register', function(request, response){
    user.findOne({ "email": email }, function (err, alreadyUser) {
     if (err) throw err;
         if (alreadyUser) {
-        console.log(alreadyUser);
          response.json({
              'code':404,
              'data':'error',
@@ -114,19 +115,19 @@ router.post('/register', function(request, response){
         userObject.lastName = lastName;
         userObject.email = email;
         userObject.password = password;
-        var img = fs.readFileSync('./uploads/profileImage.png');
-        var finalImage = {
-            contentType:'image/png',
-            data: new Buffer.from(img)
-        }
-        userObject.img = finalImage
+        // var img = fs.readFileSync('./public/uploads/profileImage.png');
+        // console.log(img)
+        // var finalImage = {
+        //     contentType:'image/png',
+        //     data: new Buffer.from(img)
+        // }
+        userObject.img = '/profileImage.png'
         userObject.save(function(err,document){
         if(err)
         {
             throw err;
             response.sendStatus(400);
         }
-        console.log(document)
         response.json({
             'code':200,
             'data': document.id,
@@ -139,12 +140,39 @@ router.post('/register', function(request, response){
 });
 
 
+router.put('/updateUser',upload.single('image'),function(req,res){
+    var {id,firstName,lastName,email,password}= req.body
+    const salt = bcrypt.genSaltSync();
+    const hash = bcrypt.hashSync(password, salt);
+    var update = {
+        firstName:firstName,
+        lastName: lastName,
+        email: email,
+        password: hash,
+        img: req.file.filename
+    }
+    
+    user.findByIdAndUpdate({"_id":id }, update, function(err,userDocument){
+        if(err) throw err;
+        res.json({
+            'code': 200,
+            'data':{
+                'id':userDocument._id,
+                'firstName': userDocument.firstName,
+                'lastName': userDocument.lastName,
+                'email': userDocument.email,
+                'img': 'http://localhost:3000/public'+userDocument.img
+            },
+            'message':'User Avaiable'
+        });
+    })
+})
+
 router.post('/profileImage', function(req,res){
-    var {email1} = req.body
-    user.findOne({ "email": email1 }, function (err, alreadyUser) {
+    var {email} = req.body
+    user.findOne({ "email": email }, function (err, alreadyUser) {
         if (err) throw err;
             if (alreadyUser) {
-            console.log(alreadyUser);
              res.json({
                  'data': alreadyUser.img,
              'message':'success'});
